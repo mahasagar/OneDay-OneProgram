@@ -1,3 +1,5 @@
+//find country name, against which this player has max avg..!
+// input : array of [country,score]
 var input = '[   ["Pakistan", 23], ["Pakistan", 127],   ["India", 3],   ["India", 71],  ["Australia", 31], ["India", 22],  ["Pakistan", 81]]';
 
 var keyValueOfCountry = {};
