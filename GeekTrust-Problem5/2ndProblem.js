@@ -40,26 +40,31 @@ var checkMessage = function(message,animal){
    }
    return true;
 };
-function sendMessages(selectedKingdom){
-    var count = 0;
+function sendMessages(selectedKingdom,allies){
+    var resultData = {
+        count : 0,
+        allies : []
+    };
     Object.keys(kingdom).forEach(function(oneKingdom) {
-      if(selectedKingdom !== oneKingdom){
+      if(selectedKingdom !== oneKingdom && allies.indexOf(oneKingdom) < 0){
          var randomMessage = messages[Math.floor(Math.random()*messages.length)];
          var animal=kingdom[oneKingdom];
-          console.log('animal :'+animal +' : randomMessage :'+randomMessage);
           var status = checkMessage(randomMessage,animal);
           if(status){
-             count++;
+             resultData.allies.push(oneKingdom);
+             resultData.count++;
           }
       }
     })
-    return count;
+    return resultData;
 }
 function competingArrangement(inputMessage){
-	console.log('inputMessage : '+inputMessage.trim());
 	inputMessage = inputMessage.trim();
 	var allies = inputMessage.split(' ');
-	console.log('allies : ',allies);
+	if(allies.length < 2){
+	    console.log('Atleast 2 allies for competing!');
+	    return;
+	}
 	var counting = {};
 	for(var i = 0; i < allies.length; i++){
 	    var oneAllies = allies[i].toLowerCase();
@@ -68,31 +73,35 @@ function competingArrangement(inputMessage){
             return;
 	    }else{
             var animal = kingdom[oneAllies];
-            var count = sendMessages(oneAllies);
-            console.log('count : '+count);
-            counting[oneAllies] = count;
+            var countResult = sendMessages(oneAllies,allies);
+            counting[oneAllies] = countResult;
 	    }
 	}
 
-	console.log('counting : '+JSON.stringify(counting));
 	var highestCount = 0;
 	var TieAllies =[];
+	var tieStringAgain = '';
 	var winnerAllies = null;
 	Object.keys(counting).forEach(function(countAllies) {
-	     if(highestCount < counting[countAllies]){
-	        highestCount = counting[countAllies];
+	     if(highestCount < counting[countAllies].count){
+	        highestCount = counting[countAllies].count;
 	        winnerAllies = countAllies;
-	     }else if(highestCount == counting[countAllies]){
+	        TieAllies =[];
+	        tieStringAgain = countAllies;
 	        TieAllies.push(countAllies);
+	     }else if(highestCount != 0 && highestCount == counting[countAllies].count){
+	        TieAllies.push(countAllies);
+	        tieStringAgain = tieStringAgain + ' '+countAllies;
 	     }
 	});
-	if(TieAllies.length){
-    	console.log('TieAllies : '+JSON.stringify(TieAllies));
-	}else{
-	    console.log('Winner : '+JSON.stringify(winnerAllies));
+	if(TieAllies.length > 1){
+    	console.log('\n');
+    	competingArrangement(tieStringAgain);
+	}else if(winnerAllies){
+	    result.ruler = winnerAllies;
+	    result.allies = counting[winnerAllies].allies;
+	    console.log('*** Done ***');
 	}
-
-
 }
 function main(){
     stdin.addListener("data", function(d) {
